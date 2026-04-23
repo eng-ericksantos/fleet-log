@@ -1,0 +1,118 @@
+<div>
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-xl font-bold text-gray-800">Veículos</h2>
+    <button (click)="showForm = true"
+      class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+      + Novo Veículo
+    </button>
+  </div>
+
+  <!-- Modal -->
+  <div *ngIf="showForm"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+    (click)="showForm = false">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden"
+      (click)="$event.stopPropagation()">
+      <!-- Modal Header -->
+      <div class="flex justify-between items-center px-6 py-4 border-b border-gray-100">
+        <h3 class="text-lg font-semibold text-gray-800">Novo Veículo</h3>
+        <button (click)="showForm = false"
+          class="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-100">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <!-- Modal Body -->
+      <form [formGroup]="form" (ngSubmit)="save()" class="px-6 py-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Placa <span class="text-red-500">*</span></label>
+            <input formControlName="plate"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              placeholder="ABC-1234 ou ABC-1D23" />
+            <p class="text-xs text-gray-400 mt-1">Formato antigo (ABC-1234) ou Mercosul (ABC-1D23)</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Marca <span class="text-red-500">*</span></label>
+            <input formControlName="brand"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              placeholder="Toyota, Ford..." />
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Modelo <span class="text-red-500">*</span></label>
+            <input formControlName="model"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              placeholder="Corolla, HB20..." />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Ano</label>
+            <input formControlName="year" type="number" min="1990" max="2030"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Quilometragem (km)</label>
+            <input formControlName="mileage" type="number" min="0"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" />
+          </div>
+        </div>
+        <!-- Modal Footer -->
+        <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
+          <button type="button" (click)="showForm = false"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+            Cancelar
+          </button>
+          <button type="submit" [disabled]="form.invalid || saving"
+            class="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
+            <svg *ngIf="saving" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+            </svg>
+            {{ saving ? 'Salvando...' : 'Salvar Veículo' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-8 text-gray-500">Carregando...</div>
+
+  <!-- Table -->
+  <div *ngIf="!loading" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Placa</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Modelo</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Marca</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ano</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Km</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ações</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200">
+        <tr *ngFor="let v of vehicles" class="hover:bg-gray-50">
+          <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ v.plate }}</td>
+          <td class="px-6 py-4 text-sm text-gray-500">{{ v.model }}</td>
+          <td class="px-6 py-4 text-sm text-gray-500">{{ v.brand }}</td>
+          <td class="px-6 py-4 text-sm text-gray-500">{{ v.year }}</td>
+          <td class="px-6 py-4 text-sm text-gray-500">{{ v.mileage | number }}</td>
+          <td class="px-6 py-4">
+            <span class="px-2 py-1 text-xs rounded-full"
+              [class]="v.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
+              {{ v.status === 'active' ? 'Ativo' : 'Inativo' }}
+            </span>
+          </td>
+          <td class="px-6 py-4">
+            <button (click)="remove(v.id)" class="text-red-600 hover:text-red-800 text-sm">Remover</button>
+          </td>
+        </tr>
+        <tr *ngIf="vehicles.length === 0">
+          <td colspan="7" class="px-6 py-8 text-center text-gray-400">Nenhum veículo cadastrado</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

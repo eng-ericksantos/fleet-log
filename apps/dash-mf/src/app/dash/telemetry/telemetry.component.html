@@ -1,0 +1,64 @@
+<div>
+  <div class="flex flex-wrap justify-between items-start gap-4 mb-6">
+    <div>
+      <h2 class="text-xl font-bold text-gray-800">Telemetria</h2>
+      <p class="text-xs text-gray-400 mt-0.5">
+        Filtro de veículo lido do <span class="font-medium text-indigo-600">NestJS / Postgres</span>
+        → dados de <span class="font-medium text-indigo-600">FastAPI / MongoDB</span>
+      </p>
+    </div>
+    <div class="flex gap-2">
+      <!-- Vehicle filter — populated from NestJS core-api -->
+      <select [(ngModel)]="filterVehicle" (change)="load()"
+        class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 bg-white min-w-[160px]">
+        <option value="">Todos os veículos</option>
+        <ng-container *ngIf="vehicles.length > 0">
+          <option *ngFor="let v of vehicles" [value]="v.plate">
+            {{ v.plate }} — {{ v.model }}
+          </option>
+        </ng-container>
+      </select>
+      <button (click)="load()"
+        class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+        🔄 Atualizar
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-8 text-gray-500">Carregando telemetria...</div>
+
+  <!-- Empty State -->
+  <div *ngIf="!loading && telemetryData.length === 0" class="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+    <p class="text-gray-400 text-lg mb-2">📡 Sem dados de telemetria</p>
+    <p class="text-gray-400 text-sm">Os dados aparecerão aqui conforme forem recebidos via API.</p>
+  </div>
+
+  <!-- Data Cards -->
+  <div *ngIf="!loading && telemetryData.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div *ngFor="let t of telemetryData" class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+      <div class="flex justify-between items-start mb-3">
+        <span class="text-sm font-medium bg-blue-100 text-blue-800 px-2 py-1 rounded">{{ t.vehicle_id }}</span>
+        <span class="text-xs text-gray-400">{{ t.timestamp | date:'short' }}</span>
+      </div>
+      <div class="space-y-2 text-sm">
+        <div class="flex justify-between">
+          <span class="text-gray-500">Velocidade</span>
+          <span class="font-medium" [class.text-red-600]="t.speed > 100" [class.text-gray-800]="t.speed <= 100">{{ t.speed }} km/h</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="text-gray-500">Lat / Lng</span>
+          <span class="font-mono text-gray-800 text-xs">{{ t.latitude | number:'1.4-4' }}, {{ t.longitude | number:'1.4-4' }}</span>
+        </div>
+        <div *ngIf="t.fuel_level !== null" class="flex justify-between">
+          <span class="text-gray-500">Combustível</span>
+          <span class="font-medium text-gray-800">{{ t.fuel_level }}%</span>
+        </div>
+        <div *ngIf="t.engine_temp !== null" class="flex justify-between">
+          <span class="text-gray-500">Temp. Motor</span>
+          <span class="font-medium" [class.text-red-600]="t.engine_temp! > 100" [class.text-gray-800]="t.engine_temp! <= 100">{{ t.engine_temp }}°C</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

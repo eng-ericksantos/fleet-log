@@ -1,0 +1,86 @@
+<div>
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-xl font-bold text-gray-800">Dashboard</h2>
+    <div class="flex items-center gap-3">
+      <button (click)="seed()" [disabled]="seeding || loading"
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg
+               bg-amber-400 hover:bg-amber-500 text-amber-900
+               text-sm font-semibold whitespace-nowrap disabled:opacity-50 transition-colors">
+        <svg *ngIf="seeding" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+        </svg>
+        <span *ngIf="!seeding">⚡</span>
+        <span>{{ seeding ? 'Gerando...' : 'Gerar Dados' }}</span>
+      </button>
+
+      <button (click)="load()" [disabled]="loading"
+        class="inline-flex items-center gap-2 px-4 py-2 rounded-lg
+               bg-blue-600 hover:bg-blue-700 text-white
+               text-sm font-medium whitespace-nowrap disabled:opacity-50 transition-colors">
+        <svg class="w-4 h-4" [class.animate-spin]="loading"
+             fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+                d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0
+                   3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1
+                   13.803-3.7l3.181 3.182m0-4.991v4.99" />
+        </svg>
+        Atualizar
+      </button>
+    </div>
+  </div>
+
+  <!-- Seed feedback -->
+  <div *ngIf="seedMessage"
+    class="mb-4 px-4 py-3 rounded-lg text-sm font-medium"
+    [class]="seedMessage.startsWith('Erro') ? 'bg-red-50 text-red-700 border border-red-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'">
+    {{ seedMessage }}
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-12 text-gray-500">Carregando dashboard...</div>
+
+  <!-- Charts Grid -->
+  <div *ngIf="!loading" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Speed Line Chart – takes 2 columns -->
+    <div class="lg:col-span-2 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div class="mb-4">
+        <h3 class="text-base font-semibold text-gray-800">Velocidade ao Longo do Tempo</h3>
+        <p class="text-sm text-gray-400 mt-0.5">Variação de velocidade por veículo (km/h)</p>
+      </div>
+      <div class="h-72">
+        <canvas baseChart
+          [type]="'line'"
+          [data]="lineChartData"
+          [options]="lineChartOptions">
+        </canvas>
+      </div>
+    </div>
+
+    <!-- Fleet Status Doughnut -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 flex flex-col">
+      <div class="mb-4">
+        <h3 class="text-base font-semibold text-gray-800">Status da Frota</h3>
+        <p class="text-sm text-gray-400 mt-0.5">Distribuição de veículos</p>
+      </div>
+      <div class="flex-1 flex items-center justify-center relative">
+        <div class="h-56 w-full">
+          <canvas baseChart
+            [type]="'doughnut'"
+            [data]="doughnutChartData"
+            [options]="doughnutChartOptions">
+          </canvas>
+        </div>
+        <!-- Center label -->
+        <div class="absolute inset-0 flex items-center justify-center pointer-events-none" style="margin-bottom: 2rem;">
+          <div class="text-center">
+            <span class="text-3xl font-bold text-gray-800">{{ totalVehicles }}</span>
+            <span class="block text-xs text-gray-400">veículos</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

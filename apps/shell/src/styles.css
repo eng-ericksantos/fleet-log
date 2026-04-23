@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== Sidebar link system ===== */
+@layer components {
+  .sidebar-link {
+    @apply flex items-center gap-3 py-2.5 rounded-lg
+           text-slate-400 text-sm font-medium
+           transition-all duration-200
+           hover:text-white hover:bg-white/[0.07];
+  }
+
+  .sidebar-link.sidebar-active {
+    @apply text-white bg-white/[0.12];
+  }
+
+  .sidebar-link.sidebar-active .sidebar-icon {
+    @apply text-accent-400;
+  }
+
+  .sidebar-icon {
+    @apply w-5 h-5 flex-shrink-0 transition-colors duration-200;
+  }
+
+  .sidebar-label {
+    @apply truncate;
+  }
+}
+
+/* ===== Scrollbar styling ===== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.5);
+}

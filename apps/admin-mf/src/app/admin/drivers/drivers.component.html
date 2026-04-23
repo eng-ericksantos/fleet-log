@@ -1,0 +1,122 @@
+<div>
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-xl font-bold text-gray-800">Motoristas</h2>
+    <button (click)="showForm = true"
+      class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
+      + Novo Motorista
+    </button>
+  </div>
+
+  <!-- Modal -->
+  <div *ngIf="showForm"
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+    (click)="showForm = false">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden"
+      (click)="$event.stopPropagation()">
+      <!-- Modal Header -->
+      <div class="flex justify-between items-center px-6 py-4 border-b border-gray-100">
+        <h3 class="text-lg font-semibold text-gray-800">Novo Motorista</h3>
+        <button (click)="showForm = false"
+          class="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-100">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <!-- Modal Body -->
+      <form [formGroup]="form" (ngSubmit)="save()" class="px-6 py-5">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nome completo <span class="text-red-500">*</span></label>
+            <input formControlName="name"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              placeholder="Nome completo do motorista" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Número da CNH <span class="text-red-500">*</span></label>
+            <input formControlName="cnh"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              placeholder="00000000000" />
+            <p class="text-xs text-gray-400 mt-1">11 dígitos numéricos, sem pontos ou traços</p>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Categoria <span class="text-red-500">*</span></label>
+            <select formControlName="cnhCategory"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white">
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="C">C</option>
+              <option value="D">D</option>
+              <option value="E">E</option>
+              <option value="AB">AB</option>
+              <option value="AC">AC</option>
+              <option value="AD">AD</option>
+              <option value="AE">AE</option>
+            </select>
+          </div>
+          <div class="md:col-span-2">
+            <label class="block text-sm font-medium text-gray-700 mb-1">Telefone <span class="text-red-500">*</span></label>
+            <input formControlName="phone"
+              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              placeholder="11999998888" />
+            <p class="text-xs text-gray-400 mt-1">Somente dígitos, com DDD (10 ou 11 dígitos)</p>
+          </div>
+        </div>
+        <!-- Modal Footer -->
+        <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
+          <button type="button" (click)="showForm = false"
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+            Cancelar
+          </button>
+          <button type="submit" [disabled]="form.invalid || saving"
+            class="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
+            <svg *ngIf="saving" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+            </svg>
+            {{ saving ? 'Salvando...' : 'Salvar Motorista' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="text-center py-8 text-gray-500">Carregando...</div>
+
+  <!-- Table -->
+  <div *ngIf="!loading" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <table class="min-w-full divide-y divide-gray-200">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nome</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">CNH</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Categoria</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Telefone</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ações</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200">
+        <tr *ngFor="let d of drivers" class="hover:bg-gray-50">
+          <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ d.name }}</td>
+          <td class="px-6 py-4 text-sm text-gray-500">{{ d.cnh }}</td>
+          <td class="px-6 py-4 text-sm text-gray-500">{{ d.cnhCategory }}</td>
+          <td class="px-6 py-4 text-sm text-gray-500">{{ d.phone }}</td>
+          <td class="px-6 py-4">
+            <span class="px-2 py-1 text-xs rounded-full"
+              [class]="d.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
+              {{ d.status === 'active' ? 'Ativo' : 'Inativo' }}
+            </span>
+          </td>
+          <td class="px-6 py-4">
+            <button (click)="remove(d.id)" class="text-red-600 hover:text-red-800 text-sm">Remover</button>
+          </td>
+        </tr>
+        <tr *ngIf="drivers.length === 0">
+          <td colspan="6" class="px-6 py-8 text-center text-gray-400">Nenhum motorista cadastrado</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

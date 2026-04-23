@@ -1,0 +1,135 @@
+services:
+  # =============================================
+  # DATABASES
+  # =============================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: fleetlog-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  mongodb:
+    image: mongo:7
+    container_name: fleetlog-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # =============================================
+  # BACKEND SERVICES
+  # =============================================
+  core-api:
+    build:
+      context: ./services/core-api
+      dockerfile: Dockerfile
+    container_name: fleetlog-core-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      DB_USER: ${DB_USER}
+      DB_PASS: ${DB_PASS}
+      DB_NAME: ${DB_NAME}
+      DB_SYNC: "true"
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ./services/core-api:/app
+      - /app/node_modules
+      - /app/dist
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  telemetry-api:
+    build:
+      context: ./services/telemetry-api
+      dockerfile: Dockerfile
+    container_name: fleetlog-telemetry-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      MONGO_URL: ${MONGO_URL}
+      MONGO_DB: ${MONGO_DB}
+      WATCHFILES_FORCE_POLLING: "true"
+    volumes:
+      - ./services/telemetry-api:/app
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
+  # =============================================
+  # MICROFRONTENDS (Angular)
+  # =============================================
+  shell:
+    build:
+      context: ./apps/shell
+      dockerfile: Dockerfile
+    container_name: fleetlog-shell
+    restart: unless-stopped
+    ports:
+      - "4200:4200"
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ./apps/shell:/app
+      - /app/node_modules
+      - /app/.angular
+    depends_on:
+      - admin-mf
+      - dash-mf
+
+  admin-mf:
+    build:
+      context: ./apps/admin-mf
+      dockerfile: Dockerfile
+    container_name: fleetlog-admin-mf
+    restart: unless-stopped
+    ports:
+      - "4201:4201"
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ./apps/admin-mf:/app
+      - /app/node_modules
+      - /app/.angular
+
+  dash-mf:
+    build:
+      context: ./apps/dash-mf
+      dockerfile: Dockerfile
+    container_name: fleetlog-dash-mf
+    restart: unless-stopped
+    ports:
+      - "4202:4202"
+    environment:
+      CHOKIDAR_USEPOLLING: "true"
+    volumes:
+      - ./apps/dash-mf:/app
+      - /app/node_modules
+      - /app/.angular
+
+volumes:
+  postgres_data:
+  mongo_data:
