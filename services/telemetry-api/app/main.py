@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from contextlib import asynccontextmanager
 from app.config import settings
+from app.seed import run_seed_if_empty
 
 
 @asynccontextmanager
@@ -16,6 +17,9 @@ async def lifespan(app: FastAPI):
     await app.state.db["logs"].create_index([("vehicle_id", 1), ("timestamp", -1)])
     await app.state.db["logs"].create_index([("severity", 1)])
     print("MongoDB indexes ensured")
+
+    # Popula dados de demonstração automaticamente se o banco estiver vazio
+    await run_seed_if_empty(app.state.db)
 
     yield
     app.state.mongo_client.close()
