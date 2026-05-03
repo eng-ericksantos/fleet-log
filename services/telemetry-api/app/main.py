@@ -25,7 +25,14 @@ async def lifespan(app: FastAPI):
     app.state.mongo_client.close()
 
 
-app = FastAPI(title="Fleet-Log Telemetry API", version="1.0", lifespan=lifespan)
+app = FastAPI(
+    title="Fleet-Log Telemetry API",
+    version="1.0",
+    description="API de telemetria e logs de eventos de frota (MongoDB).",
+    docs_url="/docs",
+    redoc_url="/redoc",
+    lifespan=lifespan,
+)
 
 app.add_middleware(
     CORSMiddleware,

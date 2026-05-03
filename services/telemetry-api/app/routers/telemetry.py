@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Request, HTTPException, Query
 from bson import ObjectId
 from bson.errors import InvalidId
-from app.models.telemetry import TelemetryData
+from app.models.telemetry import TelemetryData, TelemetryResponse, TelemetryLatestResponse
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Optional, List
 
 router = APIRouter()
 
 
-@router.get("/count")
+@router.get("/count", summary="Total de registros de telemetria")
 async def count_telemetry(request: Request, today: bool = Query(default=False)):
     """Returns total telemetry records. Use ?today=true to restrict to current UTC day."""
     query: dict = {}
@@ -19,7 +19,7 @@ async def count_telemetry(request: Request, today: bool = Query(default=False)):
     return {"total": total}
 
 
-@router.get("/")
+@router.get("/", response_model=List[TelemetryResponse], summary="Listar registros de telemetria")
 async def list_telemetry(
     request: Request,
     vehicle_id: Optional[str] = None,
@@ -36,7 +36,7 @@ async def list_telemetry(
     return results
 
 
-@router.get("/latest")
+@router.get("/latest", response_model=List[TelemetryLatestResponse], summary="Últimos registros de telemetria enriquecidos")
 async def latest_telemetry(
     request: Request,
     limit: int = Query(default=5, ge=1, le=50),
@@ -81,7 +81,7 @@ async def latest_telemetry(
     return results
 
 
-@router.get("/{telemetry_id}")
+@router.get("/{telemetry_id}", response_model=TelemetryResponse, summary="Buscar registro de telemetria por ID")
 async def get_telemetry(request: Request, telemetry_id: str):
     try:
         oid = ObjectId(telemetry_id)
@@ -94,9 +94,10 @@ async def get_telemetry(request: Request, telemetry_id: str):
     return doc
 
 
-@router.post("/", status_code=201)
+@router.post("/", status_code=201, response_model=TelemetryResponse, summary="Criar registro de telemetria")
 async def create_telemetry(request: Request, data: TelemetryData):
     doc = data.model_dump()
     doc["timestamp"] = doc["timestamp"].isoformat()
     result = await request.app.state.db["telemetry"].insert_one(doc)
     return {"id": str(result.inserted_id), **data.model_dump()}
+

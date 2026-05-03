@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from typing import Optional
 from datetime import datetime, timezone
 from enum import Enum
@@ -20,12 +20,28 @@ class Severity(str, Enum):
 
 
 class LogEntry(BaseModel):
-    vehicle_id: str
-    driver_id: Optional[str] = None
-    event_type: EventType
-    description: str = Field(min_length=1, max_length=500)
-    severity: Severity = Severity.INFO
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    model_config = ConfigDict(
+        json_schema_extra={
+            "example": {
+                "vehicle_id": "ABC-1D23",
+                "driver_id": None,
+                "event_type": "speeding",
+                "description": "Velocidade excessiva: 112 km/h",
+                "severity": "warning",
+                "timestamp": "2026-05-03T12:00:00Z",
+            }
+        }
+    )
+
+    vehicle_id: str = Field(..., description="ID ou placa do veículo")
+    driver_id: Optional[str] = Field(default=None, description="ID do motorista (opcional)")
+    event_type: EventType = Field(..., description="Tipo de evento registrado")
+    description: str = Field(..., min_length=1, max_length=500, description="Descrição detalhada do evento")
+    severity: Severity = Field(default=Severity.INFO, description="Severidade do evento")
+    timestamp: datetime = Field(
+        default_factory=lambda: datetime.now(timezone.utc),
+        description="Timestamp UTC do registro",
+    )
 
     @field_validator("vehicle_id")
     @classmethod
@@ -36,4 +52,5 @@ class LogEntry(BaseModel):
 
 
 class LogResponse(LogEntry):
-    id: str
+    id: str = Field(..., description="ID único do registro no MongoDB")
+
