@@ -13,7 +13,7 @@ export class VehiclesService {
   ) {}
 
   findAll() {
-    return this.repo.find({ order: { createdAt: 'DESC' } });
+    return this.repo.find({ order: { status: 'ASC', model: 'ASC' } });
   }
 
   count() {

@@ -29,4 +29,9 @@ export class CreateVehicleDto {
   @IsNumber()
   @IsOptional()
   mileage?: number;
+
+  @ApiPropertyOptional({ example: 'active', enum: ['active', 'inactive'] })
+  @IsString()
+  @IsOptional()
+  status?: string;
 }

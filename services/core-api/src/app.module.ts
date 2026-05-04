@@ -4,6 +4,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { VehiclesModule } from './vehicles/vehicles.module';
 import { DriversModule } from './drivers/drivers.module';
 import { HealthModule } from './health/health.module';
+import { SeedService } from './seed.service';
+import { Vehicle } from './vehicles/vehicle.entity';
+import { Driver } from './drivers/driver.entity';
 
 @Module({
   imports: [
@@ -22,9 +25,11 @@ import { HealthModule } from './health/health.module';
         synchronize: config.get('DB_SYNC', 'false') === 'true',
       }),
     }),
+    TypeOrmModule.forFeature([Vehicle, Driver]),
     VehiclesModule,
     DriversModule,
     HealthModule,
   ],
+  providers: [SeedService],
 })
 export class AppModule {}

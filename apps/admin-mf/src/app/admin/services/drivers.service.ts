@@ -22,8 +22,16 @@ export class DriversService {
     return this.http.get<Driver[]>(`${API_URL}/drivers`);
   }
 
+  getCount(): Observable<{ total: number }> {
+    return this.http.get<{ total: number }>(`${API_URL}/drivers/count`);
+  }
+
   create(data: Partial<Driver>): Observable<Driver> {
     return this.http.post<Driver>(`${API_URL}/drivers`, data);
+  }
+
+  update(id: string, data: Partial<Driver>): Observable<Driver> {
+    return this.http.put<Driver>(`${API_URL}/drivers/${id}`, data);
   }
 
   delete(id: string): Observable<void> {

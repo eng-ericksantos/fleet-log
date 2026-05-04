@@ -11,7 +11,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -94,6 +94,8 @@ services:
       CHOKIDAR_USEPOLLING: "true"
     volumes:
       - ./apps/shell:/app
+      - ./apps/admin-mf/src:/mf/admin-mf/src
+      - ./apps/dash-mf/src:/mf/dash-mf/src
       - /app/node_modules
       - /app/.angular
     depends_on:

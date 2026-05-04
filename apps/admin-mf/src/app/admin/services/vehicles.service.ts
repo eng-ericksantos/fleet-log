@@ -23,8 +23,16 @@ export class VehiclesService {
     return this.http.get<Vehicle[]>(`${API_URL}/vehicles`);
   }
 
+  getCount(): Observable<{ total: number }> {
+    return this.http.get<{ total: number }>(`${API_URL}/vehicles/count`);
+  }
+
   create(data: Partial<Vehicle>): Observable<Vehicle> {
     return this.http.post<Vehicle>(`${API_URL}/vehicles`, data);
+  }
+
+  update(id: string, data: Partial<Vehicle>): Observable<Vehicle> {
+    return this.http.put<Vehicle>(`${API_URL}/vehicles/${id}`, data);
   }
 
   delete(id: string): Observable<void> {

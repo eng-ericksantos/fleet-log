@@ -1,5 +1,5 @@
 <div>
-  <div class="flex justify-between items-center mb-6">
+  <div class="flex justify-between items-center mb-6 p-2">
     <h2 class="text-xl font-bold text-gray-800">Dashboard</h2>
     <div class="flex items-center gap-3">
       <button (click)="seed()" [disabled]="seeding || loading"
@@ -16,17 +16,16 @@
 
       <button (click)="load()" [disabled]="loading"
         class="inline-flex items-center gap-2 px-4 py-2 rounded-lg
-               bg-blue-600 hover:bg-blue-700 text-white
-               text-sm font-medium whitespace-nowrap disabled:opacity-50 transition-colors">
-        <svg class="w-4 h-4" [class.animate-spin]="loading"
-             fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0
-                   3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1
-                   13.803-3.7l3.181 3.182m0-4.991v4.99" />
+               bg-blue-100 hover:bg-blue-50 text-amber-900
+               text-sm font-semibold whitespace-nowrap disabled:opacity-50 transition-colors">
+        <svg *ngIf="loading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
         </svg>
-        Atualizar
+        <span *ngIf="!loading">🔄</span>
+        <span>Atualizar</span>
       </button>
+      
     </div>
   </div>
 

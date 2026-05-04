@@ -1,48 +1,181 @@
-<div>
-  <div class="flex justify-between items-center mb-6">
-    <h2 class="text-xl font-bold text-gray-800">Motoristas</h2>
-    <button (click)="showForm = true"
-      class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
-      + Novo Motorista
+<div class="space-y-6">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h2 class="text-2xl font-bold text-gray-900">Motoristas</h2>
+      <p class="text-sm text-gray-500 mt-0.5">{{ count }} motorista{{ count !== 1 ? 's' : '' }} cadastrado{{ count !== 1 ? 's' : '' }}</p>
+    </div>
+    <button (click)="openCreate()"
+      class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all duration-200 hover:shadow-md">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+      </svg>
+      Novo Motorista
     </button>
   </div>
 
-  <!-- Modal -->
-  <div *ngIf="showForm"
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-    (click)="showForm = false">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden"
+  <!-- Loading skeleton -->
+  <div *ngIf="loading" class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+    <div *ngFor="let i of [1,2,3]" class="flex items-center gap-4 px-6 py-4 border-b border-gray-50 last:border-0 animate-pulse">
+      <div class="h-4 bg-gray-200 rounded w-36"></div>
+      <div class="h-4 bg-gray-200 rounded w-28"></div>
+      <div class="h-4 bg-gray-200 rounded w-20"></div>
+    </div>
+  </div>
+
+  <!-- Table card -->
+  <div *ngIf="!loading" class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+
+    <!-- Empty state -->
+    <div *ngIf="drivers.length === 0" class="flex flex-col items-center justify-center py-16 px-6">
+      <div class="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
+        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"/>
+        </svg>
+      </div>
+      <p class="text-gray-500 font-medium">Nenhum motorista cadastrado</p>
+      <p class="text-gray-400 text-sm mt-1">Clique em "Novo Motorista" para começar</p>
+    </div>
+
+    <!-- Table -->
+    <table *ngIf="drivers.length > 0" class="w-full">
+      <thead>
+        <tr class="border-b border-gray-100">
+          <th class="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider px-6 py-4">Nome</th>
+          <th class="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider px-6 py-4">CNH</th>
+          <th class="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider px-6 py-4">Categoria</th>
+          <th class="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider px-6 py-4">Telefone</th>
+          <th class="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider px-6 py-4">Status</th>
+          <th class="text-right text-xs font-semibold text-gray-400 uppercase tracking-wider px-6 py-4">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let d of drivers; let last = last"
+          class="group transition-colors hover:bg-gray-50"
+          [class.border-b]="!last"
+          [class.border-gray-50]="!last">
+          <td class="px-6 py-4">
+            <div class="flex items-center gap-3">
+              <div class="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                <span class="text-xs font-bold text-blue-600">{{ d.name.charAt(0) }}</span>
+              </div>
+              <span class="text-sm font-semibold text-gray-900">{{ d.name }}</span>
+            </div>
+          </td>
+          <td class="px-6 py-4">
+            <span class="font-mono text-sm text-gray-500">{{ d.cnh }}</span>
+          </td>
+          <td class="px-6 py-4">
+            <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 text-xs font-bold">
+              {{ d.cnhCategory }}
+            </span>
+          </td>
+          <td class="px-6 py-4">
+            <span class="text-sm text-gray-500">{{ d.phone }}</span>
+          </td>
+          <td class="px-6 py-4">
+            <button (click)="toggleStatus(d)"
+              title="Clique para alternar status"
+              class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all duration-200 hover:opacity-80 cursor-pointer"
+              [class.bg-emerald-50]="d.status === 'active'"
+              [class.text-emerald-700]="d.status === 'active'"
+              [class.bg-red-50]="d.status !== 'active'"
+              [class.text-red-600]="d.status !== 'active'">
+              <span class="w-1.5 h-1.5 rounded-full"
+                [class.bg-emerald-500]="d.status === 'active'"
+                [class.bg-red-400]="d.status !== 'active'"></span>
+              {{ d.status === 'active' ? 'Ativo' : 'Inativo' }}
+            </button>
+          </td>
+          <td class="px-6 py-4">
+            <div class="flex items-center justify-end gap-1">
+              <button (click)="openEdit(d)"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-blue-600 hover:bg-blue-50 transition-colors">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z"/>
+                </svg>
+                Editar
+              </button>
+              <button (click)="remove(d)"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-red-500 hover:bg-red-50 transition-colors">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/>
+                </svg>
+                Remover
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Form Modal (Create / Edit) -->
+  <div *ngIf="showForm" class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    style="background: rgba(15, 23, 42, 0.6);" (click)="closeForm()">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden"
       (click)="$event.stopPropagation()">
+
       <!-- Modal Header -->
-      <div class="flex justify-between items-center px-6 py-4 border-b border-gray-100">
-        <h3 class="text-lg font-semibold text-gray-800">Novo Motorista</h3>
-        <button (click)="showForm = false"
-          class="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-100">
+      <div class="flex items-center justify-between px-8 py-6 border-b border-gray-100">
+        <div>
+          <h3 class="text-lg font-bold text-gray-900">{{ editingId ? 'Editar Motorista' : 'Novo Motorista' }}</h3>
+          <p class="text-sm text-gray-400 mt-0.5">{{ editingId ? 'Atualize os dados do motorista' : 'Preencha os dados do novo motorista' }}</p>
+        </div>
+        <button (click)="closeForm()" class="p-2 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
           </svg>
         </button>
       </div>
+
       <!-- Modal Body -->
-      <form [formGroup]="form" (ngSubmit)="save()" class="px-6 py-5">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Nome completo <span class="text-red-500">*</span></label>
+      <form [formGroup]="form" (ngSubmit)="save()" class="px-8 py-6">
+        <div class="grid grid-cols-2 gap-5">
+
+          <div class="col-span-2">
+            <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">
+              Nome completo <span class="text-red-500">*</span>
+            </label>
             <input formControlName="name"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              (input)="onNameInput($event)"
+              class="w-full border rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              [class.border-red-400]="form.get('name')?.invalid && form.get('name')?.touched"
+              [class.border-gray-200]="!(form.get('name')?.invalid && form.get('name')?.touched)"
               placeholder="Nome completo do motorista" />
+            <p *ngIf="form.get('name')?.invalid && form.get('name')?.touched"
+              class="text-xs text-red-500 mt-1.5">Informe o nome completo (apenas letras e espaços).</p>
           </div>
+
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Número da CNH <span class="text-red-500">*</span></label>
+            <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">
+              Número da CNH <span class="text-red-500">*</span>
+            </label>
             <input formControlName="cnh"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              (input)="onCnhInput($event)"
+              maxlength="11"
+              inputmode="numeric"
+              class="w-full border rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              [class.border-red-400]="form.get('cnh')?.invalid && form.get('cnh')?.touched"
+              [class.border-gray-200]="!(form.get('cnh')?.invalid && form.get('cnh')?.touched)"
               placeholder="00000000000" />
-            <p class="text-xs text-gray-400 mt-1">11 dígitos numéricos, sem pontos ou traços</p>
+            <p *ngIf="form.get('cnh')?.errors?.['required'] && form.get('cnh')?.touched"
+              class="text-xs text-red-500 mt-1.5">CNH é obrigatória.</p>
+            <p *ngIf="form.get('cnh')?.errors?.['cnhFormat'] && form.get('cnh')?.touched"
+              class="text-xs text-red-500 mt-1.5">CNH deve conter exatamente 11 dígitos numéricos.</p>
+            <p *ngIf="form.get('cnh')?.errors?.['cnhInvalid'] && form.get('cnh')?.touched"
+              class="text-xs text-red-500 mt-1.5">Número de CNH inválido — os dígitos verificadores não conferem.</p>
+            <p *ngIf="!(form.get('cnh')?.invalid && form.get('cnh')?.touched)"
+              class="text-xs text-gray-400 mt-1.5">Apenas números, 11 dígitos</p>
           </div>
+
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Categoria <span class="text-red-500">*</span></label>
+            <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">
+              Categoria <span class="text-red-500">*</span>
+            </label>
             <select formControlName="cnhCategory"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white">
+              class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all bg-white">
               <option value="A">A</option>
               <option value="B">B</option>
               <option value="C">C</option>
@@ -54,69 +187,78 @@
               <option value="AE">AE</option>
             </select>
           </div>
-          <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Telefone <span class="text-red-500">*</span></label>
+
+          <div class="col-span-2">
+            <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">
+              Telefone <span class="text-red-500">*</span>
+            </label>
             <input formControlName="phone"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              placeholder="11999998888" />
-            <p class="text-xs text-gray-400 mt-1">Somente dígitos, com DDD (10 ou 11 dígitos)</p>
+              (input)="onPhoneInput($event)"
+              maxlength="15"
+              inputmode="numeric"
+              class="w-full border rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              [class.border-red-400]="form.get('phone')?.invalid && form.get('phone')?.touched"
+              [class.border-gray-200]="!(form.get('phone')?.invalid && form.get('phone')?.touched)"
+              placeholder="(11) 99999-8888" />
+            <p *ngIf="form.get('phone')?.errors?.['required'] && form.get('phone')?.touched"
+              class="text-xs text-red-500 mt-1.5">Telefone é obrigatório.</p>
+            <p *ngIf="form.get('phone')?.errors?.['phoneInvalid'] && form.get('phone')?.touched"
+              class="text-xs text-red-500 mt-1.5">Telefone deve ter 10 ou 11 dígitos (com DDD).</p>
+            <p *ngIf="!form.get('phone')?.invalid || !form.get('phone')?.touched"
+              class="text-xs text-gray-400 mt-1.5">Com DDD, ex: (11) 99999-8888</p>
           </div>
+
         </div>
+
         <!-- Modal Footer -->
-        <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
-          <button type="button" (click)="showForm = false"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+        <div class="flex items-center justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
+          <button type="button" (click)="closeForm()"
+            class="px-5 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">
             Cancelar
           </button>
           <button type="submit" [disabled]="form.invalid || saving"
-            class="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
+            class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm hover:shadow">
             <svg *ngIf="saving" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
             </svg>
-            {{ saving ? 'Salvando...' : 'Salvar Motorista' }}
+            {{ saving ? 'Salvando...' : (editingId ? 'Salvar alterações' : 'Criar motorista') }}
           </button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Loading -->
-  <div *ngIf="loading" class="text-center py-8 text-gray-500">Carregando...</div>
-
-  <!-- Table -->
-  <div *ngIf="!loading" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-    <table class="min-w-full divide-y divide-gray-200">
-      <thead class="bg-gray-50">
-        <tr>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nome</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">CNH</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Categoria</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Telefone</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ações</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-gray-200">
-        <tr *ngFor="let d of drivers" class="hover:bg-gray-50">
-          <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ d.name }}</td>
-          <td class="px-6 py-4 text-sm text-gray-500">{{ d.cnh }}</td>
-          <td class="px-6 py-4 text-sm text-gray-500">{{ d.cnhCategory }}</td>
-          <td class="px-6 py-4 text-sm text-gray-500">{{ d.phone }}</td>
-          <td class="px-6 py-4">
-            <span class="px-2 py-1 text-xs rounded-full"
-              [class]="d.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
-              {{ d.status === 'active' ? 'Ativo' : 'Inativo' }}
-            </span>
-          </td>
-          <td class="px-6 py-4">
-            <button (click)="remove(d.id)" class="text-red-600 hover:text-red-800 text-sm">Remover</button>
-          </td>
-        </tr>
-        <tr *ngIf="drivers.length === 0">
-          <td colspan="6" class="px-6 py-8 text-center text-gray-400">Nenhum motorista cadastrado</td>
-        </tr>
-      </tbody>
-    </table>
+  <!-- Confirm Delete Modal -->
+  <div *ngIf="showConfirm" class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    style="background: rgba(15, 23, 42, 0.6);" (click)="cancelConfirm()">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+      (click)="$event.stopPropagation()">
+      <div class="p-8">
+        <div class="flex items-start gap-4">
+          <div class="flex-shrink-0 w-11 h-11 rounded-full bg-red-100 flex items-center justify-center">
+            <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/>
+            </svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h4 class="text-base font-bold text-gray-900 mb-1">Confirmar exclusão</h4>
+            <p class="text-sm text-gray-500 leading-relaxed" [innerHTML]="confirmMessage"></p>
+          </div>
+        </div>
+        <div class="flex items-center justify-end gap-3 mt-7">
+          <button (click)="cancelConfirm()"
+            class="px-5 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">
+            Cancelar
+          </button>
+          <button (click)="executeConfirm()"
+            class="px-5 py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-all shadow-sm hover:shadow">
+            Sim, remover
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
+
 </div>
+

@@ -1,118 +1,249 @@
-<div>
-  <div class="flex justify-between items-center mb-6">
-    <h2 class="text-xl font-bold text-gray-800">Veículos</h2>
-    <button (click)="showForm = true"
-      class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium">
-      + Novo Veículo
+<div class="space-y-6">
+
+  <!-- Header -->
+  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h2 class="text-2xl font-bold text-gray-900">Veículos</h2>
+      <p class="text-sm text-gray-500 mt-0.5">{{ count }} veículo{{ count !== 1 ? 's' : '' }} cadastrado{{ count !== 1 ? 's' : '' }}</p>
+    </div>
+    <button (click)="openCreate()"
+      class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all duration-200 hover:shadow-md">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+      </svg>
+      Novo Veículo
     </button>
   </div>
 
-  <!-- Modal -->
-  <div *ngIf="showForm"
-    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-    (click)="showForm = false">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg mx-4 overflow-hidden"
+  <!-- Loading skeleton -->
+  <div *ngIf="loading" class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+    <div *ngFor="let i of [1,2,3]" class="flex items-center gap-4 px-6 py-4 border-b border-gray-50 last:border-0 animate-pulse">
+      <div class="h-4 bg-gray-200 rounded w-24"></div>
+      <div class="h-4 bg-gray-200 rounded w-32"></div>
+      <div class="h-4 bg-gray-200 rounded w-28"></div>
+    </div>
+  </div>
+
+  <!-- Table card -->
+  <div *ngIf="!loading" class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+
+    <!-- Empty state -->
+    <div *ngIf="vehicles.length === 0" class="flex flex-col items-center justify-center py-16 px-6">
+      <div class="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
+        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25"/>
+        </svg>
+      </div>
+      <p class="text-gray-500 font-medium">Nenhum veículo cadastrado</p>
+      <p class="text-gray-400 text-sm mt-1">Clique em "Novo Veículo" para começar</p>
+    </div>
+
+    <!-- Table -->
+    <table *ngIf="vehicles.length > 0" class="w-full">
+      <thead>
+        <tr class="border-b border-gray-100">
+          <th class="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider px-6 py-4">Placa</th>
+          <th class="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider px-6 py-4">Modelo</th>
+          <th class="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider px-6 py-4">Marca</th>
+          <th class="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider px-6 py-4">Ano</th>
+          <th class="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider px-6 py-4">Km</th>
+          <th class="text-left text-xs font-semibold text-gray-400 uppercase tracking-wider px-6 py-4">Status</th>
+          <th class="text-right text-xs font-semibold text-gray-400 uppercase tracking-wider px-6 py-4">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let v of vehicles; let last = last"
+          class="group transition-colors hover:bg-gray-50"
+          [class.border-b]="!last"
+          [class.border-gray-50]="!last">
+          <td class="px-6 py-4">
+            <span class="font-mono text-sm font-semibold text-gray-900 bg-gray-100 px-2 py-0.5 rounded-lg">{{ v.plate }}</span>
+          </td>
+          <td class="px-6 py-4">
+            <span class="text-sm font-medium text-gray-800">{{ v.model }}</span>
+          </td>
+          <td class="px-6 py-4">
+            <span class="text-sm text-gray-500">{{ v.brand }}</span>
+          </td>
+          <td class="px-6 py-4">
+            <span class="text-sm text-gray-500">{{ v.year }}</span>
+          </td>
+          <td class="px-6 py-4">
+            <span class="text-sm text-gray-500">{{ v.mileage | number:'1.0-0' }} km</span>
+          </td>
+          <td class="px-6 py-4">
+            <button (click)="toggleStatus(v)"
+              title="Clique para alternar status"
+              class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all duration-200 hover:opacity-80 cursor-pointer"
+              [class.bg-emerald-50]="v.status === 'active'"
+              [class.text-emerald-700]="v.status === 'active'"
+              [class.bg-red-50]="v.status !== 'active'"
+              [class.text-red-600]="v.status !== 'active'">
+              <span class="w-1.5 h-1.5 rounded-full"
+                [class.bg-emerald-500]="v.status === 'active'"
+                [class.bg-red-400]="v.status !== 'active'"></span>
+              {{ v.status === 'active' ? 'Ativo' : 'Inativo' }}
+            </button>
+          </td>
+          <td class="px-6 py-4">
+            <div class="flex items-center justify-end gap-1">
+              <button (click)="openEdit(v)"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-blue-600 hover:bg-blue-50 transition-colors">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Z"/>
+                </svg>
+                Editar
+              </button>
+              <button (click)="remove(v)"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-red-500 hover:bg-red-50 transition-colors">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"/>
+                </svg>
+                Remover
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Form Modal (Create / Edit) -->
+  <div *ngIf="showForm" class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    style="background: rgba(15, 23, 42, 0.6);" (click)="closeForm()">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden"
       (click)="$event.stopPropagation()">
+
       <!-- Modal Header -->
-      <div class="flex justify-between items-center px-6 py-4 border-b border-gray-100">
-        <h3 class="text-lg font-semibold text-gray-800">Novo Veículo</h3>
-        <button (click)="showForm = false"
-          class="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-gray-100">
+      <div class="flex items-center justify-between px-8 py-6 border-b border-gray-100">
+        <div>
+          <h3 class="text-lg font-bold text-gray-900">{{ editingId ? 'Editar Veículo' : 'Novo Veículo' }}</h3>
+          <p class="text-sm text-gray-400 mt-0.5">{{ editingId ? 'Atualize os dados do veículo' : 'Preencha os dados do novo veículo' }}</p>
+        </div>
+        <button (click)="closeForm()" class="p-2 rounded-xl text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
           </svg>
         </button>
       </div>
+
       <!-- Modal Body -->
-      <form [formGroup]="form" (ngSubmit)="save()" class="px-6 py-5">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Placa <span class="text-red-500">*</span></label>
+      <form [formGroup]="form" (ngSubmit)="save()" class="px-8 py-6">
+        <div class="grid grid-cols-2 gap-5">
+
+          <div class="col-span-2 sm:col-span-1">
+            <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">
+              Placa <span class="text-red-500">*</span>
+            </label>
             <input formControlName="plate"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
-              placeholder="ABC-1234 ou ABC-1D23" />
-            <p class="text-xs text-gray-400 mt-1">Formato antigo (ABC-1234) ou Mercosul (ABC-1D23)</p>
+              (input)="formatPlate($event)"
+              maxlength="8"
+              class="w-full border rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              [class.border-red-400]="form.get('plate')?.invalid && form.get('plate')?.touched"
+              [class.border-gray-200]="!(form.get('plate')?.invalid && form.get('plate')?.touched)"
+              placeholder="ABC-1D23" />
+            <p *ngIf="form.get('plate')?.invalid && form.get('plate')?.touched"
+              class="text-xs text-red-500 mt-1.5">Formato inválido. Use ABC-1234 ou ABC-1D23 (Mercosul).</p>
+            <p *ngIf="!(form.get('plate')?.invalid && form.get('plate')?.touched)"
+              class="text-xs text-gray-400 mt-1.5">Letras maiúsculas e números, ex: ABC-1D23</p>
           </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Marca <span class="text-red-500">*</span></label>
+
+          <div class="col-span-2 sm:col-span-1">
+            <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">
+              Marca <span class="text-red-500">*</span>
+            </label>
             <input formControlName="brand"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              class="w-full border rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              [class.border-red-400]="form.get('brand')?.invalid && form.get('brand')?.touched"
+              [class.border-gray-200]="!(form.get('brand')?.invalid && form.get('brand')?.touched)"
               placeholder="Toyota, Ford..." />
+            <p *ngIf="form.get('brand')?.invalid && form.get('brand')?.touched"
+              class="text-xs text-red-500 mt-1.5">Marca é obrigatória.</p>
           </div>
-          <div class="md:col-span-2">
-            <label class="block text-sm font-medium text-gray-700 mb-1">Modelo <span class="text-red-500">*</span></label>
+
+          <div class="col-span-2">
+            <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">
+              Modelo <span class="text-red-500">*</span>
+            </label>
             <input formControlName="model"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              class="w-full border rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              [class.border-red-400]="form.get('model')?.invalid && form.get('model')?.touched"
+              [class.border-gray-200]="!(form.get('model')?.invalid && form.get('model')?.touched)"
               placeholder="Corolla, HB20..." />
+            <p *ngIf="form.get('model')?.invalid && form.get('model')?.touched"
+              class="text-xs text-red-500 mt-1.5">Modelo é obrigatório.</p>
           </div>
+
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Ano</label>
-            <input formControlName="year" type="number" min="1990" max="2030"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" />
+            <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Ano</label>
+            <input formControlName="year" type="number" min="1990" max="2030" inputmode="numeric"
+              class="w-full border rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              [class.border-red-400]="form.get('year')?.invalid && form.get('year')?.touched"
+              [class.border-gray-200]="!(form.get('year')?.invalid && form.get('year')?.touched)" />
+            <p *ngIf="form.get('year')?.invalid && form.get('year')?.touched"
+              class="text-xs text-red-500 mt-1.5">Ano deve estar entre 1990 e 2030.</p>
           </div>
+
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Quilometragem (km)</label>
-            <input formControlName="mileage" type="number" min="0"
-              class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" />
+            <label class="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-2">Quilometragem (km)</label>
+            <input formControlName="mileage" type="number" min="0" inputmode="numeric"
+              class="w-full border rounded-xl px-4 py-3 text-sm text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all"
+              [class.border-red-400]="form.get('mileage')?.invalid && form.get('mileage')?.touched"
+              [class.border-gray-200]="!(form.get('mileage')?.invalid && form.get('mileage')?.touched)" />
+            <p *ngIf="form.get('mileage')?.invalid && form.get('mileage')?.touched"
+              class="text-xs text-red-500 mt-1.5">Quilometragem não pode ser negativa.</p>
           </div>
+
         </div>
+
         <!-- Modal Footer -->
-        <div class="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
-          <button type="button" (click)="showForm = false"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+        <div class="flex items-center justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
+          <button type="button" (click)="closeForm()"
+            class="px-5 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">
             Cancelar
           </button>
           <button type="submit" [disabled]="form.invalid || saving"
-            class="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2">
+            class="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-xl transition-all shadow-sm hover:shadow">
             <svg *ngIf="saving" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
             </svg>
-            {{ saving ? 'Salvando...' : 'Salvar Veículo' }}
+            {{ saving ? 'Salvando...' : (editingId ? 'Salvar alterações' : 'Criar veículo') }}
           </button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Loading -->
-  <div *ngIf="loading" class="text-center py-8 text-gray-500">Carregando...</div>
-
-  <!-- Table -->
-  <div *ngIf="!loading" class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-    <table class="min-w-full divide-y divide-gray-200">
-      <thead class="bg-gray-50">
-        <tr>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Placa</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Modelo</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Marca</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ano</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Km</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-          <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ações</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-gray-200">
-        <tr *ngFor="let v of vehicles" class="hover:bg-gray-50">
-          <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ v.plate }}</td>
-          <td class="px-6 py-4 text-sm text-gray-500">{{ v.model }}</td>
-          <td class="px-6 py-4 text-sm text-gray-500">{{ v.brand }}</td>
-          <td class="px-6 py-4 text-sm text-gray-500">{{ v.year }}</td>
-          <td class="px-6 py-4 text-sm text-gray-500">{{ v.mileage | number }}</td>
-          <td class="px-6 py-4">
-            <span class="px-2 py-1 text-xs rounded-full"
-              [class]="v.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'">
-              {{ v.status === 'active' ? 'Ativo' : 'Inativo' }}
-            </span>
-          </td>
-          <td class="px-6 py-4">
-            <button (click)="remove(v.id)" class="text-red-600 hover:text-red-800 text-sm">Remover</button>
-          </td>
-        </tr>
-        <tr *ngIf="vehicles.length === 0">
-          <td colspan="7" class="px-6 py-8 text-center text-gray-400">Nenhum veículo cadastrado</td>
-        </tr>
-      </tbody>
-    </table>
+  <!-- Confirm Delete Modal -->
+  <div *ngIf="showConfirm" class="fixed inset-0 z-50 flex items-center justify-center p-4"
+    style="background: rgba(15, 23, 42, 0.6);" (click)="cancelConfirm()">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+      (click)="$event.stopPropagation()">
+      <div class="p-8">
+        <div class="flex items-start gap-4">
+          <div class="flex-shrink-0 w-11 h-11 rounded-full bg-red-100 flex items-center justify-center">
+            <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/>
+            </svg>
+          </div>
+          <div class="flex-1 min-w-0">
+            <h4 class="text-base font-bold text-gray-900 mb-1">Confirmar exclusão</h4>
+            <p class="text-sm text-gray-500 leading-relaxed" [innerHTML]="confirmMessage"></p>
+          </div>
+        </div>
+        <div class="flex items-center justify-end gap-3 mt-7">
+          <button (click)="cancelConfirm()"
+            class="px-5 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">
+            Cancelar
+          </button>
+          <button (click)="executeConfirm()"
+            class="px-5 py-2.5 text-sm font-semibold text-white bg-red-600 hover:bg-red-700 rounded-xl transition-all shadow-sm hover:shadow">
+            Sim, remover
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
+
 </div>

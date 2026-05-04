@@ -13,7 +13,7 @@ export class DriversService {
   ) {}
 
   findAll() {
-    return this.repo.find({ order: { createdAt: 'DESC' } });
+    return this.repo.find({ order: { status: 'ASC', name: 'ASC' } });
   }
 
   count() {
