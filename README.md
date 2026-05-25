@@ -296,6 +296,174 @@ apps/[nome]-mf/
 
 ---
 
+## Teste de Carga (K6)
+
+O diretório `load-test/` contém um script K6 que simula **50 VUs simultâneos por 30 segundos**, exercitando os dois backends em paralelo:
+
+| Requisição | Endpoint | Serviço |
+|---|---|---|
+| `POST` | `/api/telemetry` | FastAPI — insere telemetria (sensores) |
+| `GET` | `/api/vehicles` | NestJS — lista a frota (dashboard) |
+
+### Pré-requisitos
+
+- [Docker](https://www.docker.com/get-started) instalado (não é necessário instalar o K6 localmente)
+- Todos os serviços do Fleet-Log em execução (`docker-compose up`)
+
+### 1. Executar o teste via Docker
+
+```bash
+# Windows (PowerShell) — Docker Desktop
+docker run --rm `
+  -v "${PWD}/load-test:/load-test" `
+  -w /load-test `
+  -e CORE_API_URL=http://host.docker.internal:3000 `
+  -e TELEMETRY_URL=http://host.docker.internal:8000 `
+  grafana/k6 run k6-script.js `
+  --out json=results/raw.json `
+  --out csv=results/raw.csv
+```
+
+```bash
+# Linux / macOS (bash)
+docker run --rm \
+  -v "$(pwd)/load-test:/load-test" \
+  -w /load-test \
+  -e CORE_API_URL=http://host.docker.internal:3000 \
+  -e TELEMETRY_URL=http://host.docker.internal:8000 \
+  grafana/k6 run k6-script.js \
+  --out json=results/raw.json \
+  --out csv=results/raw.csv
+```
+
+> **Linux sem Docker Desktop:** substitua `host.docker.internal` por `172.17.0.1` (gateway padrão do Docker) ou use `--network host` com `localhost`.
+
+Ao final do teste o terminal exibe um resumo e os seguintes arquivos são criados:
+
+| Arquivo | Conteúdo |
+|---|---|
+| `load-test/results/raw.json` | Série temporal completa (NDJSON — para gráficos de throughput) |
+| `load-test/results/raw.csv` | Todos os pontos de dados em CSV |
+| `load-test/results/k6-summary.json` | Métricas agregadas em JSON |
+| `load-test/results/k6-report.html` | **Relatório visual** gerado automaticamente (abrir no browser) |
+
+### 2. Gráficos de Throughput — Série Temporal
+
+O arquivo `k6-report.html` gerado pelo próprio K6 exibe gráficos de percentis de latência e cards de resumo. Para um **relatório de série temporal** (req/s ao longo do tempo, latência p95 por segundo, VUs ativos) a partir do `raw.json`:
+
+```bash
+# Requer Python 3.8+ — sem dependências externas
+python load-test/generate-report.py \
+  load-test/results/raw.json \
+  load-test/results/k6-timeseries.html
+```
+
+Abra `load-test/results/k6-timeseries.html` no browser para visualizar:
+
+- 📈 **Throughput** (req/s por segundo) com linha de média
+- ⏱️ **Latência** avg e p95 global ao longo do tempo
+- 🔀 **Latência p95 por endpoint** (POST Telemetria vs GET Veículos)
+- 👥 **VUs ativos** ao longo do tempo
+- 🔴 **Erros** por segundo
+
+### 3. Thresholds definidos
+
+| Métrica | Limite |
+|---|---|
+| Taxa de erro global | `< 5 %` |
+| Latência p95 global | `< 2 000 ms` |
+| Latência p95 POST telemetria | `< 1 500 ms` |
+| Latência p95 GET veículos | `< 1 000 ms` |
+
+O K6 retorna código de saída `1` se algum threshold for violado — útil para pipelines CI.
+
+---
+
+## Monitoramento de Recursos (Docker Stats)
+
+O script `load-test/monitor-stats.py` captura **CPU% e RAM** dos containers `fleetlog-mongodb` e `fleetlog-postgres` a cada segundo via `docker stats`, permitindo comparar o comportamento de cada banco durante o pico de carga do K6.
+
+### Arquivos gerados
+
+| Arquivo | Conteúdo |
+|---|---|
+| `results/docker-stats.csv` | Série temporal completa em CSV |
+| `results/docker-stats-report.html` | Relatório visual interativo (abrível no browser) |
+
+### Como usar
+
+**Passo 1 — Abra dois terminais lado a lado.**
+
+**Terminal A — inicie o monitor** (antes ou durante o teste K6):
+
+```bash
+# Requer Python 3.8+ — sem dependências externas
+cd load-test
+python monitor-stats.py
+```
+
+Parâmetros opcionais:
+
+```bash
+python monitor-stats.py --interval 2          # amostra a cada 2 s (padrão: 1 s)
+python monitor-stats.py --output /tmp/run     # prefixo de saída customizado
+python monitor-stats.py --containers fleetlog-mongodb fleetlog-postgres
+```
+
+O terminal mostrará as métricas em tempo real:
+
+```
+══════════════════════════════════════════════════════════════
+  Fleet-Log — Monitor de Recursos Docker
+══════════════════════════════════════════════════════════════
+  Containers : fleetlog-mongodb, fleetlog-postgres
+  Intervalo  : 1s
+  ...
+  [  42s] amostra #  42   |   mongodb: CPU   3.2%  RAM   128.4 MB (1.6%)   |   postgres: CPU   0.8%  RAM    45.1 MB (0.6%)
+```
+
+**Terminal B — rode o teste K6** (ver seção anterior).
+
+**Encerre o monitor** com `Ctrl+C`: o script salva o CSV e gera o HTML automaticamente.
+
+### Relatório HTML
+
+Abra `load-test/results/docker-stats-report.html` no browser para visualizar:
+
+| Gráfico | O que mostra |
+|---|---|
+| **CPU %** (full-width) | Consumo de CPU dos dois bancos ao longo do tempo |
+| **RAM (MB)** | Crescimento de memória absoluta |
+| **RAM %** | Uso relativo em relação ao limite do container |
+| **PIDs ativos** | Número de processos/threads no container |
+| **Rede RX acumulado** | Total de dados recebidos (acumulado desde o start) |
+
+Cards de resumo mostram **CPU médio, CPU pico, RAM médio e RAM pico** por container — ideal para slides de TCC.
+
+### Fluxo completo em paralelo
+
+```bash
+# Terminal 1 — Monitor de recursos
+python load-test/monitor-stats.py
+
+# Terminal 2 — Teste de carga K6 (Docker)
+docker run --rm \
+  -v "$(pwd)/load-test:/load-test" -w /load-test \
+  -e CORE_API_URL=http://host.docker.internal:3000 \
+  -e TELEMETRY_URL=http://host.docker.internal:8000 \
+  grafana/k6 run k6-script.js \
+  --out json=results/raw.json --out csv=results/raw.csv
+
+# Terminal 1 — Ctrl+C após o K6 terminar → relatórios gerados
+
+# Terminal 2 — Gera série temporal do K6
+python load-test/generate-report.py results/raw.json
+```
+
+> **Dica:** rode `monitor-stats.py` alguns segundos **antes** do K6 para capturar a linha de base (idle) dos bancos e destacar o salto de consumo quando o teste começa.
+
+---
+
 ## Expandindo o Projeto
 
 Consulte o [REGRAS.md](./REGRAS.md) para guias detalhados sobre:

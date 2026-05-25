@@ -1,0 +1,12 @@
+# Resultados gerados em tempo de execução — ignorados pelo git
+
+# K6
+raw.json
+raw.csv
+k6-summary.json
+k6-report.html
+k6-timeseries.html
+
+# Docker Stats Monitor
+docker-stats.csv
+docker-stats-report.html

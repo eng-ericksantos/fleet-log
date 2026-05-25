@@ -1,4 +1,4 @@
-<div>
+﻿<div>
   <div class="flex flex-wrap justify-between items-start gap-4 mb-6">
     <div>
       <h2 class="text-xl font-bold text-gray-800">Logs de Eventos</h2>
@@ -8,7 +8,6 @@
       </p>
     </div>
     <div class="flex flex-wrap gap-2">
-      <!-- Vehicle filter — populated from NestJS core-api -->
       <select [(ngModel)]="filterVehicle" (change)="onVehicleChange()"
         class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 bg-white min-w-[160px]">
         <option value="">Todos os veículos</option>
@@ -32,9 +31,7 @@
     </div>
   </div>
 
-  <!-- ═══════════════════════════════════════════════════
-       SECTION 1 — Rastreabilidade de Telemetria (MongoDB)
-       ═══════════════════════════════════════════════════ -->
+
   <div class="mb-8">
     <div class="flex items-center gap-3 mb-3">
       <h3 class="text-base font-semibold text-gray-800">Últimos Registros de Telemetria</h3>
@@ -42,7 +39,6 @@
       <span class="text-xs text-gray-400">Persistência poliglota — últimos 5 eventos capturados</span>
     </div>
 
-    <!-- Skeleton loading -->
     <div *ngIf="loadingTelemetry" class="bg-white rounded-xl border border-gray-200 overflow-hidden">
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
@@ -64,14 +60,12 @@
       </table>
     </div>
 
-    <!-- Empty state -->
     <div *ngIf="!loadingTelemetry && telemetryEvents.length === 0"
       class="bg-white rounded-xl border border-gray-200 p-10 text-center">
       <p class="text-gray-400 text-base mb-1">📡 Sem registros de telemetria</p>
       <p class="text-gray-400 text-sm">Use o botão <strong>⚡ Gerar Dados</strong> no Dashboard para popular o banco.</p>
     </div>
 
-    <!-- Telemetry audit table -->
     <div *ngIf="!loadingTelemetry && telemetryEvents.length > 0"
       class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
       <table class="min-w-full divide-y divide-gray-200">
@@ -113,26 +107,21 @@
     </div>
   </div>
 
-  <!-- ═════════════════════════════════════════
-       SECTION 2 — Alertas Automáticos (Logs)
-       ═════════════════════════════════════════ -->
+
   <div>
     <div class="flex items-center gap-3 mb-3">
       <h3 class="text-base font-semibold text-gray-800">Alertas Automáticos</h3>
       <span class="text-xs px-2 py-0.5 bg-orange-100 text-orange-700 rounded-full font-medium">MongoDB · FastAPI</span>
     </div>
 
-    <!-- Loading -->
     <div *ngIf="loading" class="text-center py-8 text-gray-500">Carregando alertas...</div>
 
-    <!-- Empty State -->
     <div *ngIf="!loading && logs.length === 0"
       class="bg-white rounded-xl shadow-sm border border-gray-200 p-10 text-center">
       <p class="text-gray-400 text-base mb-1">📋 Sem alertas registrados</p>
       <p class="text-gray-400 text-sm">Alertas são gerados automaticamente (velocidade &gt; 100 km/h ou combustível &lt; 20%).</p>
     </div>
 
-    <!-- Logs Table -->
     <div *ngIf="!loading && logs.length > 0"
       class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
       <table class="min-w-full divide-y divide-gray-200">

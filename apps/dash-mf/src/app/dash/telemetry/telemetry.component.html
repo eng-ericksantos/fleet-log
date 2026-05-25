@@ -1,4 +1,4 @@
-<div>
+﻿<div>
   <div class="flex flex-wrap justify-between items-start gap-4 mb-6">
     <div>
       <h2 class="text-xl font-bold text-gray-800">Telemetria</h2>
@@ -8,7 +8,6 @@
       </p>
     </div>
     <div class="flex gap-2">
-      <!-- Vehicle filter — populated from NestJS core-api -->
       <select [(ngModel)]="filterVehicle" (change)="load()"
         class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 bg-white min-w-[160px]">
         <option value="">Todos os veículos</option>
@@ -25,16 +24,13 @@
     </div>
   </div>
 
-  <!-- Loading -->
   <div *ngIf="loading" class="text-center py-8 text-gray-500">Carregando telemetria...</div>
 
-  <!-- Empty State -->
   <div *ngIf="!loading && telemetryData.length === 0" class="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
     <p class="text-gray-400 text-lg mb-2">📡 Sem dados de telemetria</p>
     <p class="text-gray-400 text-sm">Os dados aparecerão aqui conforme forem recebidos via API.</p>
   </div>
 
-  <!-- Data Cards -->
   <div *ngIf="!loading && telemetryData.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
     <div *ngFor="let t of telemetryData" class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
       <div class="flex justify-between items-start mb-3">

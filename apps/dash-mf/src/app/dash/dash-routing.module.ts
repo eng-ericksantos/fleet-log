@@ -4,6 +4,7 @@ import { DashComponent } from './dash.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { TelemetryComponent } from './telemetry/telemetry.component';
 import { LogsComponent } from './logs/logs.component';
+import { ObservabilityComponent } from './observability/observability.component';
 
 const routes: Routes = [
   {
@@ -14,6 +15,7 @@ const routes: Routes = [
       { path: 'dashboard', component: DashboardComponent },
       { path: 'telemetry', component: TelemetryComponent },
       { path: 'logs', component: LogsComponent },
+      { path: 'observability', component: ObservabilityComponent },
     ],
   },
 ];

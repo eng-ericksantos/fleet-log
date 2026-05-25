@@ -1,0 +1,12 @@
+<div class="fixed bottom-4 right-4 z-[9999] flex flex-col gap-2 items-end pointer-events-none">
+  @for (toast of (toasts$ | async) ?? []; track toast.id) {
+    <div class="latency-toast flex items-center gap-2.5 px-3 py-2 rounded-lg
+                bg-slate-900/95 backdrop-blur-sm border border-white/10 shadow-xl
+                text-xs pointer-events-auto select-none">
+      <span class="w-2 h-2 rounded-full flex-shrink-0 animate-pulse" [ngClass]="dotClass(toast)"></span>
+      <span class="font-semibold text-white tracking-tight">{{ toast.service }}</span>
+      <span class="text-slate-400 truncate max-w-[140px]" [title]="toast.url">{{ shortPath(toast.url) }}</span>
+      <span class="ml-1 font-mono font-bold" [ngClass]="timeClass(toast)">{{ displayMs(toast) }}</span>
+    </div>
+  }
+</div>

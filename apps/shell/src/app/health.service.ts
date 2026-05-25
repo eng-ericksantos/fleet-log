@@ -17,7 +17,6 @@ export class HealthService {
   readonly telemetryStatus$ = this.telemetry$.asObservable();
 
   constructor(private http: HttpClient) {
-    // Check immediately, then re-check every 30 seconds
     timer(0, 30_000)
       .pipe(
         switchMap(() =>

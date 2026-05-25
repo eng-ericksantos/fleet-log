@@ -55,7 +55,6 @@ export class TelemetryService {
       .pipe(catchError(() => of(MOCK_TELEMETRY)));
   }
 
-  /** Derives fleet status counts from the latest record of each vehicle. */
   deriveFleetStatus(data: TelemetryData[]): FleetStatus[] {
     const latest = new Map<string, TelemetryData>();
     for (const d of data) {

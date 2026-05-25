@@ -7,7 +7,6 @@ from typing import List, Optional
 
 router = APIRouter()
 
-# Coordenadas base: São Paulo
 BASE_LAT = -23.5505
 BASE_LON = -46.6333
 
@@ -40,7 +39,6 @@ async def simulate_gps(request: Request, vehicle_id: str):
     result = await request.app.state.db["telemetry"].insert_one(doc)
     telemetry_id = str(result.inserted_id)
 
-    # Gera logs automáticos com base nos dados
     log_docs = []
     logs_created = []
 
@@ -76,13 +74,10 @@ async def simulate_gps(request: Request, vehicle_id: str):
     }
 
 
-# ---------------------------------------------------------------------------
-# Vehicles used as seed reference (base coordinates per city)
-# ---------------------------------------------------------------------------
 _SEED_VEHICLES = [
-    {"id": "VH-001", "lat": -23.5505, "lon": -46.6333},  # São Paulo
-    {"id": "VH-002", "lat": -22.9068, "lon": -43.1729},  # Rio de Janeiro
-    {"id": "VH-003", "lat": -19.9167, "lon": -43.9345},  # Belo Horizonte
+    {"id": "VH-001", "lat": -23.5505, "lon": -46.6333},
+    {"id": "VH-002", "lat": -22.9068, "lon": -43.1729},
+    {"id": "VH-003", "lat": -19.9167, "lon": -43.9345},
 ]
 
 
@@ -109,7 +104,6 @@ async def seed_telemetry(
     if clear:
         await db["telemetry"].delete_many({})
 
-    # Build vehicle list: use provided IDs or fall back to defaults
     if vehicle_ids:
         vehicles = [
             {"id": vid, "lat": _SEED_VEHICLES[i % len(_SEED_VEHICLES)]["lat"],
@@ -120,16 +114,14 @@ async def seed_telemetry(
         vehicles = _SEED_VEHICLES
 
     now = datetime.now(timezone.utc)
-    window_seconds = 7200  # 2 hours
+    window_seconds = 7200
     interval = window_seconds / count
     docs = []
 
     for vehicle in vehicles:
-        # Simulate a realistic speed profile (start slow, peak, slow down)
         base_speed = random.uniform(30, 80)
         for i in range(count):
             ts = now - timedelta(seconds=window_seconds - i * interval)
-            # Gentle random walk on speed
             base_speed = max(0.0, min(130.0, base_speed + random.uniform(-15, 15)))
             fuel = round(random.uniform(20, 100), 1)
             temp = round(random.uniform(70, 105), 1)

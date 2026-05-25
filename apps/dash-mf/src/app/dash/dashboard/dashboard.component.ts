@@ -13,7 +13,6 @@ export class DashboardComponent implements OnInit {
   seeding = false;
   seedMessage = '';
 
-  // Line chart – speed over time
   lineChartData: ChartConfiguration<'line'>['data'] = { labels: [], datasets: [] };
   lineChartOptions: ChartConfiguration<'line'>['options'] = {
     responsive: true,
@@ -29,7 +28,6 @@ export class DashboardComponent implements OnInit {
     interaction: { mode: 'nearest', axis: 'x', intersect: false },
   };
 
-  // Doughnut chart – fleet status
   doughnutChartData: ChartConfiguration<'doughnut'>['data'] = { labels: [], datasets: [] };
   doughnutChartOptions: ChartConfiguration<'doughnut'>['options'] = {
     responsive: true,
@@ -65,7 +63,6 @@ export class DashboardComponent implements OnInit {
   seed(): void {
     this.seeding = true;
     this.seedMessage = '';
-    // Fetch real vehicle plates from NestJS first, then seed MongoDB with them
     this.vehiclesService.getAll().subscribe({
       next: (vehicles) => {
         const plates = vehicles.map((v) => v.plate);
@@ -83,7 +80,6 @@ export class DashboardComponent implements OnInit {
         });
       },
       error: () => {
-        // Core-API offline — seed with demo vehicles
         this.telemetryService.seed(10, true).subscribe({
           next: (res) => {
             this.seeding = false;

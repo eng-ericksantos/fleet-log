@@ -1,16 +1,10 @@
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 
-/**
- * Valida o número da CNH pelos dígitos verificadores.
- * Algoritmo oficial baseado no padrão DETRAN/SENATRAN.
- * Não substitui consulta ao órgão emissor, mas garante que o número é matematicamente válido.
- */
 export function validateCNHDigits(cnh: string): boolean {
   const digits = cnh.replace(/\D/g, '');
 
   if (digits.length !== 11) return false;
 
-  // Sequências com todos dígitos iguais são inválidas (ex: 11111111111)
   if (/^(\d)\1{10}$/.test(digits)) return false;
 
   let sum = 0;
@@ -42,7 +36,7 @@ export function validateCNHDigits(cnh: string): boolean {
 export function cnhValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     const value = control.value as string;
-    if (!value) return null; // required é validado separadamente
+    if (!value) return null;
     if (!/^\d{11}$/.test(value)) return { cnhFormat: true };
     if (!validateCNHDigits(value)) return { cnhInvalid: true };
     return null;

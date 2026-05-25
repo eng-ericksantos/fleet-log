@@ -12,17 +12,16 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from motor.motor_asyncio import AsyncIOMotorDatabase
 
-# Demo vehicles spread across major Brazilian cities
 _SEED_VEHICLES = [
-    {"id": "VH-001", "lat": -23.5505, "lon": -46.6333},  # São Paulo
-    {"id": "VH-002", "lat": -22.9068, "lon": -43.1729},  # Rio de Janeiro
-    {"id": "VH-003", "lat": -19.9167, "lon": -43.9345},  # Belo Horizonte
-    {"id": "VH-004", "lat": -25.4284, "lon": -49.2733},  # Curitiba
-    {"id": "VH-005", "lat": -30.0346, "lon": -51.2177},  # Porto Alegre
+    {"id": "VH-001", "lat": -23.5505, "lon": -46.6333},
+    {"id": "VH-002", "lat": -22.9068, "lon": -43.1729},
+    {"id": "VH-003", "lat": -19.9167, "lon": -43.9345},
+    {"id": "VH-004", "lat": -25.4284, "lon": -49.2733},
+    {"id": "VH-005", "lat": -30.0346, "lon": -51.2177},
 ]
 
 _RECORDS_PER_VEHICLE = 30   # ~2 h de histórico, intervalo ~4 min
-_WINDOW_SECONDS = 7_200     # janela de 2 horas
+_WINDOW_SECONDS = 7_200
 
 
 def _build_telemetry_docs(vehicles: list[dict], count: int) -> list[dict]:

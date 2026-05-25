@@ -1,4 +1,5 @@
-from fastapi import FastAPI
+import time
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 from contextlib import asynccontextmanager
@@ -12,13 +13,11 @@ async def lifespan(app: FastAPI):
     app.state.db = app.state.mongo_client[settings.MONGO_DB]
     print(f"Connected to MongoDB: {settings.MONGO_URL}/{settings.MONGO_DB}")
 
-    # Índices para queries de alto volume
     await app.state.db["telemetry"].create_index([("vehicle_id", 1), ("timestamp", -1)])
     await app.state.db["logs"].create_index([("vehicle_id", 1), ("timestamp", -1)])
     await app.state.db["logs"].create_index([("severity", 1)])
     print("MongoDB indexes ensured")
 
-    # Popula dados de demonstração automaticamente se o banco estiver vazio
     await run_seed_if_empty(app.state.db)
 
     yield
@@ -39,9 +38,19 @@ app.add_middleware(
     allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["X-Response-Time"],
 )
 
-from app.routers import telemetry, logs, simulate  # noqa: E402
+
+@app.middleware("http")
+async def add_response_time_header(request: Request, call_next):
+    start = time.perf_counter()
+    response = await call_next(request)
+    elapsed_ms = (time.perf_counter() - start) * 1000
+    response.headers["X-Response-Time"] = f"{elapsed_ms:.2f}ms"
+    return response
+
+from app.routers import telemetry, logs, simulate
 
 app.include_router(telemetry.router, prefix="/api/telemetry", tags=["Telemetry"])
 app.include_router(logs.router, prefix="/api/logs", tags=["Logs"])

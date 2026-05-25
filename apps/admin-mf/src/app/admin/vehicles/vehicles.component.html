@@ -1,6 +1,5 @@
-<div class="space-y-6">
+﻿<div class="space-y-6">
 
-  <!-- Header -->
   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
       <h2 class="text-2xl font-bold text-gray-900">Veículos</h2>
@@ -15,7 +14,6 @@
     </button>
   </div>
 
-  <!-- Loading skeleton -->
   <div *ngIf="loading" class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
     <div *ngFor="let i of [1,2,3]" class="flex items-center gap-4 px-6 py-4 border-b border-gray-50 last:border-0 animate-pulse">
       <div class="h-4 bg-gray-200 rounded w-24"></div>
@@ -24,10 +22,8 @@
     </div>
   </div>
 
-  <!-- Table card -->
   <div *ngIf="!loading" class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
 
-    <!-- Empty state -->
     <div *ngIf="vehicles.length === 0" class="flex flex-col items-center justify-center py-16 px-6">
       <div class="w-16 h-16 rounded-2xl bg-gray-100 flex items-center justify-center mb-4">
         <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
@@ -38,7 +34,6 @@
       <p class="text-gray-400 text-sm mt-1">Clique em "Novo Veículo" para começar</p>
     </div>
 
-    <!-- Table -->
     <table *ngIf="vehicles.length > 0" class="w-full">
       <thead>
         <tr class="border-b border-gray-100">
@@ -108,13 +103,11 @@
     </table>
   </div>
 
-  <!-- Form Modal (Create / Edit) -->
   <div *ngIf="showForm" class="fixed inset-0 z-50 flex items-center justify-center p-4"
     style="background: rgba(15, 23, 42, 0.6);" (click)="closeForm()">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden"
       (click)="$event.stopPropagation()">
 
-      <!-- Modal Header -->
       <div class="flex items-center justify-between px-8 py-6 border-b border-gray-100">
         <div>
           <h3 class="text-lg font-bold text-gray-900">{{ editingId ? 'Editar Veículo' : 'Novo Veículo' }}</h3>
@@ -127,7 +120,6 @@
         </button>
       </div>
 
-      <!-- Modal Body -->
       <form [formGroup]="form" (ngSubmit)="save()" class="px-8 py-6">
         <div class="grid grid-cols-2 gap-5">
 
@@ -196,7 +188,6 @@
 
         </div>
 
-        <!-- Modal Footer -->
         <div class="flex items-center justify-end gap-3 mt-8 pt-6 border-t border-gray-100">
           <button type="button" (click)="closeForm()"
             class="px-5 py-2.5 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-xl transition-colors">
@@ -215,7 +206,6 @@
     </div>
   </div>
 
-  <!-- Confirm Delete Modal -->
   <div *ngIf="showConfirm" class="fixed inset-0 z-50 flex items-center justify-center p-4"
     style="background: rgba(15, 23, 42, 0.6);" (click)="cancelConfirm()">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"

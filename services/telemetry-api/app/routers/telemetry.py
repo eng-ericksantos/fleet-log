@@ -61,7 +61,6 @@ async def latest_telemetry(
         fuel = doc.get("fuel_level")
         temp = doc.get("engine_temp")
 
-        # Build a human-readable event description
         parts = [f"Velocidade: {speed} km/h"]
         if fuel is not None:
             parts.append(f"Combustível: {fuel}%")
@@ -69,7 +68,6 @@ async def latest_telemetry(
             parts.append(f"Temp. motor: {temp}°C")
         doc["event"] = " · ".join(parts)
 
-        # Derive status from thresholds
         if speed > 100 or (fuel is not None and fuel < 15):
             doc["status"] = "critical"
         elif speed > 80 or (fuel is not None and fuel < 25):

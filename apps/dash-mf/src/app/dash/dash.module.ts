@@ -7,9 +7,10 @@ import { DashComponent } from './dash.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { TelemetryComponent } from './telemetry/telemetry.component';
 import { LogsComponent } from './logs/logs.component';
+import { ObservabilityComponent } from './observability/observability.component';
 
 @NgModule({
-  declarations: [DashComponent, DashboardComponent, TelemetryComponent, LogsComponent],
+  declarations: [DashComponent, DashboardComponent, TelemetryComponent, LogsComponent, ObservabilityComponent],
   imports: [CommonModule, FormsModule, BaseChartDirective, DashRoutingModule],
   providers: [provideCharts(withDefaultRegisterables())],
 })
