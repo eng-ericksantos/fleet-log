@@ -1,9 +1,13 @@
-import { NgModule } from '@angular/core';
+import { NgModule, LOCALE_ID } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
 import { provideHttpClient, withFetch } from '@angular/common/http';
+import { registerLocaleData } from '@angular/common';
+import localePt from '@angular/common/locales/pt';
 import { AppComponent } from './app.component';
 import { AdminModule } from './admin/admin.module';
+
+registerLocaleData(localePt);
 
 @NgModule({
   declarations: [AppComponent],
@@ -15,7 +19,10 @@ import { AdminModule } from './admin/admin.module';
       { path: '**', redirectTo: 'admin' },
     ]),
   ],
-  providers: [provideHttpClient(withFetch())],
+  providers: [
+    provideHttpClient(withFetch()),
+    { provide: LOCALE_ID, useValue: 'pt-BR' },
+  ],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

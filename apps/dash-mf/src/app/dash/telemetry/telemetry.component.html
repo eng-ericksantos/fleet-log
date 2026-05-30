@@ -35,7 +35,7 @@
     <div *ngFor="let t of telemetryData" class="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
       <div class="flex justify-between items-start mb-3">
         <span class="text-sm font-medium bg-blue-100 text-blue-800 px-2 py-1 rounded">{{ t.vehicle_id }}</span>
-        <span class="text-xs text-gray-400">{{ t.timestamp | date:'short' }}</span>
+        <span class="text-xs text-gray-400">{{ t.timestamp | dateBr:'short' }}</span>
       </div>
       <div class="space-y-2 text-sm">
         <div class="flex justify-between">

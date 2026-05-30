@@ -8,9 +8,10 @@ import { DashboardComponent } from './dashboard/dashboard.component';
 import { TelemetryComponent } from './telemetry/telemetry.component';
 import { LogsComponent } from './logs/logs.component';
 import { ObservabilityComponent } from './observability/observability.component';
+import { DateBrPipe } from '../shared/pipes/date-br.pipe';
 
 @NgModule({
-  declarations: [DashComponent, DashboardComponent, TelemetryComponent, LogsComponent, ObservabilityComponent],
+  declarations: [DashComponent, DashboardComponent, TelemetryComponent, LogsComponent, ObservabilityComponent, DateBrPipe],
   imports: [CommonModule, FormsModule, BaseChartDirective, DashRoutingModule],
   providers: [provideCharts(withDefaultRegisterables())],
 })

@@ -294,10 +294,10 @@
 
             <div class="flex flex-col items-end flex-shrink-0">
               <span class="text-xs font-mono font-semibold text-gray-600">
-                {{ formatTime(entry.timestamp) }}
+                {{ entry.timestamp | dateBr:'time' }}
               </span>
               <span class="text-xs text-gray-300">
-                {{ formatDate(entry.timestamp) }} · {{ relativeTime(entry.timestamp) }}
+                {{ entry.timestamp | dateBr:'date-short' }} · {{ entry.timestamp | dateBr:'relative' }}
               </span>
             </div>
           </div>

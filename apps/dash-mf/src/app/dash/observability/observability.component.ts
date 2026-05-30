@@ -184,25 +184,6 @@ export class ObservabilityComponent implements OnInit, OnDestroy {
     return map[type] ?? type;
   }
 
-  formatTime(ts: string): string {
-    try { return new Date(ts).toLocaleTimeString('pt-BR'); } catch { return ts; }
-  }
-
-  formatDate(ts: string): string {
-    try {
-      return new Date(ts).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-    } catch { return ''; }
-  }
-
-  relativeTime(ts: string): string {
-    try {
-      const diff = (Date.now() - new Date(ts).getTime()) / 1000;
-      if (diff < 60)   return `${Math.round(diff)}s atrás`;
-      if (diff < 3600) return `${Math.round(diff / 60)}min atrás`;
-      return `${Math.round(diff / 3600)}h atrás`;
-    } catch { return ''; }
-  }
-
   ngOnDestroy(): void {
     this.subs.unsubscribe();
   }
